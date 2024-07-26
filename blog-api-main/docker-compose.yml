@@ -1,0 +1,37 @@
+version: "3.8"
+
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URI=mongodb://mongo:27017/blog_api
+      - JWT_SECRET=your_jwt_secret_here
+    depends_on:
+      - mongo
+    volumes:
+      - uploads-data:/app/public/uploads
+
+  mongo:
+    image: mongo:6.0
+    volumes:
+      - mongo-data:/data/db
+    ports:
+      - "27017:27017"
+
+  seeder:
+    build: .
+    command: sh -c "yarn build && ./seeder.sh"
+    environment:
+      - MONGODB_URI=mongodb://mongo:27017/blog_api
+      - JWT_SECRET=your_jwt_secret_here
+      - NODE_ENV=production
+      - UPLOAD_DIR=./public/uploads
+    depends_on:
+      - mongo
+
+volumes:
+  mongo-data:
+  uploads-data:
